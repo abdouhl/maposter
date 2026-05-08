@@ -17,6 +17,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_CREDIT_URL?: string;
   readonly VITE_DEVELOPER_NAME?: string;
   readonly VITE_DEVELOPER_PROFILE_URL?: string;
+  readonly VITE_PRINTFUL_PROXY_URL?: string;
 }
 
 interface ImportMeta {

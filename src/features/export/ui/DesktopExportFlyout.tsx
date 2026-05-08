@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useExport } from "@/features/export/application/useExport";
 import type { ExportFormat } from "@/features/export/domain/types";
 import { DownloadIcon, LoaderIcon } from "@/shared/ui/Icons";
+import BuyButton from "@/features/printful/ui/BuyButton";
 
 const FLYOUT_FORMATS: { format: ExportFormat; label: string }[] = [
   { format: "svg", label: "RSVG" },
@@ -39,7 +40,7 @@ export default function DesktopExportFlyout() {
           </button>
         ))}
       </div>
-
+      <BuyButton variant="fab" />
       <button
         type="button"
         className="desktop-export-btn desktop-export-btn--primary"

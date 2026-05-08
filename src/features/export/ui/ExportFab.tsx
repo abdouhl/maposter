@@ -3,6 +3,7 @@ import { useExport } from "@/features/export/application/useExport";
 import type { ExportFormat } from "@/features/export/domain/types";
 import { CloseIcon, DownloadIcon, LoaderIcon } from "@/shared/ui/Icons";
 import SocialLinkGroup from "@/shared/ui/SocialLinkGroup";
+import BuyButton from "@/features/printful/ui/BuyButton";
 
 const FORMAT_OPTIONS: { format: ExportFormat; label: string }[] = [
   { format: "png", label: "PNG" },
@@ -114,6 +115,7 @@ export default function ExportFab({ isMobile }: ExportFabProps) {
                   <span>{label}</span>
                 </button>
               ))}
+              <BuyButton variant="modal-row" />
             </div>
             <p className="export-modal-support-label">
               Support the project <span className="heart">❤︎</span>
