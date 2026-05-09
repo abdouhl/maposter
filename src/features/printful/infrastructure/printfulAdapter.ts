@@ -10,12 +10,20 @@ const PROXY_BASE = (import.meta as any).env?.VITE_PRINTFUL_PROXY_URL ?? "";
 
 async function uploadImageToProxy(imageBlob: Blob): Promise<string> {
   if (!PROXY_BASE) throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
-  const formData = new FormData();
-  formData.append("file", imageBlob, "poster.png");
+
+  const fileBase64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read image blob"));
+    reader.readAsDataURL(imageBlob);
+  });
+
   const response = await fetch(`${PROXY_BASE}/api/printful/upload`, {
     method: "POST",
-    body: formData,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileBase64 }),
   });
+
   if (!response.ok) {
     const error = await response.text().catch(() => "Unknown upload error");
     throw new Error(`Image upload failed: ${error}`);

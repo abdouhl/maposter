@@ -648,3 +648,55 @@
     flex: 1 1 auto;
   }
 }
+
+/* ── Frame color picker ── */
+
+.buy-frame-grid {
+  display: flex;
+  gap: 10px;
+}
+
+.buy-frame-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  margin: 0;
+  border: 1px solid rgba(146, 176, 200, 0.2);
+  border-radius: 11px;
+  background: rgba(14, 26, 38, 0.9);
+  cursor: pointer;
+  flex: 1;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.buy-frame-card:hover {
+  transform: none;
+  filter: none;
+  border-color: rgba(94, 174, 212, 0.5);
+  background: rgba(22, 40, 58, 0.95);
+}
+
+.buy-frame-card.is-selected {
+  border-color: rgba(94, 174, 212, 0.85);
+  background: rgba(55, 171, 203, 0.12);
+  box-shadow: 0 0 0 2px rgba(55, 171, 203, 0.18);
+}
+
+.buy-frame-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: block;
+  flex-shrink: 0;
+}
+
+.buy-frame-label {
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(195, 220, 240, 0.8);
+  letter-spacing: 0.04em;
+}
