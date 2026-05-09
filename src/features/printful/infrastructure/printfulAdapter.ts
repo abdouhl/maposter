@@ -8,15 +8,32 @@ import { PRINT_SIZE_OPTIONS, PRINT_FRAME_OPTIONS } from "../domain/constants";
 
 const PROXY_BASE = (import.meta as any).env?.VITE_PRINTFUL_PROXY_URL ?? "";
 
-async function uploadImageToProxy(imageBlob: Blob): Promise<string> {
-  if (!PROXY_BASE) throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
-
-  const fileBase64 = await new Promise<string>((resolve, reject) => {
+/**
+ * Reads a Blob as a base64 data URI.
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error("Failed to read image blob"));
-    reader.readAsDataURL(imageBlob);
+    reader.readAsDataURL(blob);
   });
+}
+
+/**
+ * Step 1: Upload the PNG blob to the worker.
+ * The worker uploads it to R2, then registers it with Printful Files API.
+ * Returns the Printful-hosted file URL (or R2 URL as fallback).
+ */
+async function uploadImageToProxy(imageBlob: Blob): Promise<string> {
+  if (!PROXY_BASE) {
+    throw new Error(
+      "VITE_PRINTFUL_PROXY_URL is not configured. " +
+      "Add it to your .env file and restart the dev server."
+    );
+  }
+
+  const fileBase64 = await blobToBase64(imageBlob);
 
   const response = await fetch(`${PROXY_BASE}/api/printful/upload`, {
     method: "POST",
@@ -25,26 +42,49 @@ async function uploadImageToProxy(imageBlob: Blob): Promise<string> {
   });
 
   if (!response.ok) {
-    const error = await response.text().catch(() => "Unknown upload error");
-    throw new Error(`Image upload failed: ${error}`);
+    let errorText = "Unknown upload error";
+    try {
+      const errData = await response.json();
+      errorText = errData?.error ?? JSON.stringify(errData);
+    } catch {
+      errorText = await response.text().catch(() => "Unknown upload error");
+    }
+    throw new Error(`Image upload failed: ${errorText}`);
   }
+
   const data = await response.json();
-  return String(data.fileUrl ?? data.url ?? "");
+  const fileUrl = String(data.fileUrl ?? data.r2Url ?? "");
+  if (!fileUrl) throw new Error("Worker did not return a fileUrl");
+  return fileUrl;
 }
 
 export const printfulAdapter: IPrintfulPort = {
-  async generateMockup(imageBlob, variantId): Promise<PrintfulMockupResult> {
-    if (!PROXY_BASE) throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
+  async generateMockup(imageBlob: Blob, variantId: number): Promise<PrintfulMockupResult> {
+    if (!PROXY_BASE) {
+      throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
+    }
+
+    // Upload image first — worker handles R2 + Printful file registration
     const fileUrl = await uploadImageToProxy(imageBlob);
+
+    // Request mockup generation
     const response = await fetch(`${PROXY_BASE}/api/printful/mockup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ variantId, fileUrl }),
     });
+
     if (!response.ok) {
-      const error = await response.text().catch(() => "Mockup error");
-      throw new Error(`Mockup generation failed: ${error}`);
+      let errorText = "Mockup error";
+      try {
+        const errData = await response.json();
+        errorText = errData?.error ?? JSON.stringify(errData);
+      } catch {
+        errorText = await response.text().catch(() => "Mockup error");
+      }
+      throw new Error(`Mockup generation failed: ${errorText}`);
     }
+
     const data = await response.json();
     return {
       mockupUrl: String(data.mockupUrl ?? ""),
@@ -53,11 +93,17 @@ export const printfulAdapter: IPrintfulPort = {
   },
 
   async createOrder(options: PrintOrderOptions): Promise<PrintfulOrderResult> {
-    if (!PROXY_BASE) throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
+    if (!PROXY_BASE) {
+      throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
+    }
+
     const sizeOption = PRINT_SIZE_OPTIONS.find((s) => s.id === options.sizeId);
     const frameOption = PRINT_FRAME_OPTIONS.find((f) => f.id === options.frameColor);
     if (!sizeOption) throw new Error(`Unknown print size: ${options.sizeId}`);
+
+    // Upload fresh image for the order
     const fileUrl = await uploadImageToProxy(options.imageBlob);
+
     const response = await fetch(`${PROXY_BASE}/api/printful/order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -69,10 +115,18 @@ export const printfulAdapter: IPrintfulPort = {
         frameName: frameOption?.label ?? options.frameColor,
       }),
     });
+
     if (!response.ok) {
-      const error = await response.text().catch(() => "Order error");
-      throw new Error(`Order creation failed: ${error}`);
+      let errorText = "Order error";
+      try {
+        const errData = await response.json();
+        errorText = errData?.error ?? JSON.stringify(errData);
+      } catch {
+        errorText = await response.text().catch(() => "Order error");
+      }
+      throw new Error(`Order creation failed: ${errorText}`);
     }
+
     const data = await response.json();
     return {
       checkoutUrl: String(data.checkoutUrl ?? ""),
