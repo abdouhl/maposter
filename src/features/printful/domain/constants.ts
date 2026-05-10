@@ -5,52 +5,41 @@ import type {
   PrintFrameOption,
 } from "./types";
 
-// ── Real variant IDs from Printful store (product ID: 431618295)
-// Framed photo paper poster — sync_variant IDs per size + frame color
+// ── Catalog variant IDs from Printful public catalog (product ID: 2)
+// Enhanced Matte Paper Framed Poster (in)
+// Source: GET https://api.printful.com/products/2
 
+// Black frame catalog variant IDs
 const BLACK_VARIANTS: Record<string, number> = {
-  "8x10":  5298209263,
-  "10x10": 5298209264,
-  "11x14": 5298209265,
-  "12x12": 5298209266,
-  "12x16": 5298209267,
-  "12x18": 5298209268,
-  "14x14": 5298209270,
-  "16x16": 5298209271,
-  "16x20": 5298209272,
-  "18x18": 5298209273,
-  "18x24": 5298209274,
-  "24x36": 5298209275,
+  "8x10":  4651,
+  "11x14": 14292,
+  "12x16": 1350,
+  "12x18": 4398,
+  "16x20": 4399,
+  "18x24": 3,
+  "24x36": 4,
 };
 
+// Red Oak frame catalog variant IDs
 const RED_OAK_VARIANTS: Record<string, number> = {
-  "8x10":  5298209276,
-  "10x10": 5298209277,
-  "11x14": 5298209278,
-  "12x12": 5298209279,
-  "12x16": 5298209280,
-  "12x18": 5298209281,
-  "14x14": 5298209282,
-  "16x16": 5298209284,
-  "16x20": 5298209285,
-  "18x18": 5298209286,
-  "18x24": 5298209287,
-  "24x36": 5298209288,
+  "8x10":  15021,
+  "11x14": 15023,
+  "12x16": 15025,
+  "12x18": 15026,
+  "16x20": 15029,
+  "18x24": 15031,
+  "24x36": 15032,
 };
 
+// White frame catalog variant IDs
 const WHITE_VARIANTS: Record<string, number> = {
-  "8x10":  5298209289,
-  "10x10": 5298209290,
-  "11x14": 5298209291,
-  "12x12": 5298209292,
-  "12x16": 5298209293,
-  "12x18": 5298209294,
-  "14x14": 5298209295,
-  "16x16": 5298209296,
-  "16x20": 5298209298,
-  "18x18": 5298209299,
-  "18x24": 5298209300,
-  "24x36": 5298209301,
+  "8x10":  10754,
+  "11x14": 14293,
+  "12x16": 10751,
+  "12x18": 10752,
+  "16x20": 10753,
+  "18x24": 10749,
+  "24x36": 10750,
 };
 
 export const FRAME_VARIANT_MAP: Record<string, Record<string, number>> = {
@@ -65,22 +54,22 @@ export function getVariantId(sizeKey: string, frameColor: string): number {
 }
 
 export const PRINT_SIZE_OPTIONS: PrintSizeOption[] = [
-  { id: "8x10",  label: '8" × 10"',  widthCm: 20.3, heightCm: 25.4, sizeKey: "8x10",  priceUsd: 27.50 },
-  { id: "11x14", label: '11" × 14"', widthCm: 27.9, heightCm: 35.6, sizeKey: "11x14", priceUsd: 35.00 },
-  { id: "12x16", label: '12" × 16"', widthCm: 30.5, heightCm: 40.6, sizeKey: "12x16", priceUsd: 42.00 },
-  { id: "16x20", label: '16" × 20"', widthCm: 40.6, heightCm: 50.8, sizeKey: "16x20", priceUsd: 58.00 },
-  { id: "18x24", label: '18" × 24"', widthCm: 45.7, heightCm: 61.0, sizeKey: "18x24", priceUsd: 72.00 },
-  { id: "24x36", label: '24" × 36"', widthCm: 61.0, heightCm: 91.4, sizeKey: "24x36", priceUsd: 109.50 },
+  { id: "8x10",  label: '8" × 10"',  widthCm: 20.3, heightCm: 25.4, sizeKey: "8x10",  priceUsd: 20.35 },
+  { id: "11x14", label: '11" × 14"', widthCm: 27.9, heightCm: 35.6, sizeKey: "11x14", priceUsd: 30.09 },
+  { id: "12x16", label: '12" × 16"', widthCm: 30.5, heightCm: 40.6, sizeKey: "12x16", priceUsd: 31.57 },
+  { id: "16x20", label: '16" × 20"', widthCm: 40.6, heightCm: 50.8, sizeKey: "16x20", priceUsd: 41.77 },
+  { id: "18x24", label: '18" × 24"', widthCm: 45.7, heightCm: 61.0, sizeKey: "18x24", priceUsd: 45.39 },
+  { id: "24x36", label: '24" × 36"', widthCm: 61.0, heightCm: 91.4, sizeKey: "24x36", priceUsd: 74.41 },
 ];
 
 export const PRINT_FRAME_OPTIONS: PrintFrameOption[] = [
   { id: "black",   label: "Black",    swatchHex: "#1a1a1a", priceModifierUsd: 0 },
   { id: "white",   label: "White",    swatchHex: "#f0f0f0", priceModifierUsd: 0 },
-  { id: "red_oak", label: "Red Oak",  swatchHex: "#8B4513", priceModifierUsd: 0 },
+  { id: "red_oak", label: "Red Oak",  swatchHex: "#D4A489", priceModifierUsd: 0 },
 ];
 
 export const PRINT_PAPER_OPTIONS: PrintPaperOption[] = [
-  { id: "luster", label: "Luster Paper", description: "Semi-gloss finish. Sharp detail, minimal glare.", priceModifierUsd: 0 },
+  { id: "luster", label: "Matte Paper", description: "Enhanced matte finish. Sharp detail, no glare.", priceModifierUsd: 0 },
 ];
 
 export const DEFAULT_PRINT_SIZE = "11x14";
