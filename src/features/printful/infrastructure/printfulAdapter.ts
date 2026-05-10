@@ -8,9 +8,6 @@ import { PRINT_SIZE_OPTIONS, PRINT_FRAME_OPTIONS } from "../domain/constants";
 
 const PROXY_BASE = (import.meta as any).env?.VITE_PRINTFUL_PROXY_URL ?? "";
 
-/**
- * Reads a Blob as a base64 data URI.
- */
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -20,11 +17,6 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-/**
- * Step 1: Upload the PNG blob to the worker.
- * The worker uploads it to R2, then registers it with Printful Files API.
- * Returns the Printful-hosted file URL (or R2 URL as fallback).
- */
 async function uploadImageToProxy(imageBlob: Blob): Promise<string> {
   if (!PROXY_BASE) {
     throw new Error(
@@ -64,10 +56,10 @@ export const printfulAdapter: IPrintfulPort = {
       throw new Error("VITE_PRINTFUL_PROXY_URL is not configured.");
     }
 
-    // Upload image first — worker handles R2 + Printful file registration
     const fileUrl = await uploadImageToProxy(imageBlob);
 
-    // Request mockup generation
+    // Send variantId directly — Worker will use it as-is.
+    // If variantId is 0/invalid, the Worker will return a clear error.
     const response = await fetch(`${PROXY_BASE}/api/printful/mockup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -101,15 +93,17 @@ export const printfulAdapter: IPrintfulPort = {
     const frameOption = PRINT_FRAME_OPTIONS.find((f) => f.id === options.frameColor);
     if (!sizeOption) throw new Error(`Unknown print size: ${options.sizeId}`);
 
-    // Upload fresh image for the order
     const fileUrl = await uploadImageToProxy(options.imageBlob);
 
+    // Send sizeKey + frameColor so the Worker resolves the correct variant ID
+    // dynamically from the mockup-generator catalog.
     const response = await fetch(`${PROXY_BASE}/api/printful/order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fileUrl,
-        variantId: options.variantId,
+        sizeKey: sizeOption.sizeKey,
+        frameColor: options.frameColor,
         posterTitle: options.posterTitle,
         sizeName: sizeOption.label,
         frameName: frameOption?.label ?? options.frameColor,
